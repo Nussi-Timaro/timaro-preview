@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <!-- iOS Fix: viewport-fit=cover + verhindert komisches Layout in Safari/In-App -->
+  <!-- iOS/WebView fix -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Timaro Preview</title>
   <style>
@@ -18,9 +18,9 @@
       --radius:18px;
     }
 
-    /* ✅ iOS/Safari Fix: verhindert automatisches Text-Zoom/Resize */
-    html { -webkit-text-size-adjust: 100%; }
-    body { overflow-x: hidden; }
+    /* ✅ iOS/Safari: verhindert Text-Auto-Resize */
+    html{ -webkit-text-size-adjust:100%; }
+    body{ overflow-x:hidden; }
 
     *{box-sizing:border-box}
     body{
@@ -43,16 +43,26 @@
       padding: 14px;
       box-shadow: var(--shadow);
     }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+    /* ✅ FIX A: obere Felder (2-Spalten) als FLEX statt GRID -> kein Safari-Overlap */
+    .grid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+    .grid > .field{
+      flex: 1 1 calc(50% - 6px);
+      min-width:0;
+    }
+
+    /* Das 3er Layout lassen wir wie gehabt (du wolltest nur A fixen) */
     .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 
-    /* ✅ iOS Fix: verhindert Overlap in Grid/Flex */
     .field{display:flex;flex-direction:column;gap:8px;min-width:0;}
-
     label{font-size:13px;color:var(--muted);letter-spacing:.2px;}
     input, select, button, textarea{font:inherit;}
 
-    /* ✅ iOS Fix: Inputs müssen min. 16px haben (sonst zoomt Safari und Layout bricht) */
+    /* ✅ iOS: Inputs >=16px, sonst zoomt Safari und Layout überlappt */
     input, select, textarea{
       width:100%;
       padding:12px 12px;
@@ -61,14 +71,14 @@
       outline:none;
       background:rgba(0,0,0,.18);
       color:var(--text);
-      font-size:16px; /* wichtig */
+      font-size:16px;
     }
 
     textarea{min-height:90px; resize:vertical;}
+    textarea::placeholder{color:rgba(255,255,255,.35);}
     input::placeholder, textarea::placeholder{color:rgba(255,255,255,.35);}
     input:focus, select:focus, textarea:focus{border-color:rgba(241,194,76,.45);box-shadow:0 0 0 3px rgba(241,194,76,.12);}
     .row{display:flex;gap:10px;align-items:center;}
-
     .btn{
       border:1px solid var(--stroke);
       background:rgba(255,255,255,.04);
@@ -245,7 +255,9 @@
     }
 
     @media (max-width:640px){
-      .grid{grid-template-columns:1fr 1fr;}
+      /* .grid ist Flex -> auf Handy eine Spalte */
+      .grid > .field{ flex: 1 1 100%; }
+
       .grid-3{grid-template-columns:1fr;}
       .footer-actions{grid-template-columns:1fr;}
       .stats{grid-template-columns:1fr 1fr;}
@@ -253,25 +265,31 @@
       .star{width:44px;height:44px;}
     }
 
-    /* ✅ Toast Popup (Gespeichert) */
+    /* ✅ Größeres "Gespeichert" Popup */
     .toast{
       position: fixed;
       left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%) translateY(14px);
+      bottom: 24px;
+      transform: translateX(-50%) translateY(16px);
       opacity: 0;
       pointer-events: none;
       z-index: 10000;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(17,24,39,.95);
-      color: rgba(255,255,255,.92);
-      box-shadow: 0 16px 50px rgba(0,0,0,.55);
-      transition: opacity .18s ease, transform .18s ease;
-      font-size: 14px;
-      max-width: calc(100vw - 22px);
+
+      padding: 16px 22px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(17,24,39,.98), rgba(17,24,39,.90));
+      color: rgba(255,255,255,.95);
+
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .2px;
+
+      box-shadow: 0 18px 60px rgba(0,0,0,.65);
+      transition: opacity .2s ease, transform .2s ease;
       text-align: center;
+      min-width: 260px;
+      max-width: calc(100vw - 24px);
     }
     .toast.show{
       opacity: 1;
@@ -378,7 +396,7 @@
   </div>
 
   <!-- ✅ Toast -->
-  <div id="toast" class="toast">Gespeichert ✅</div>
+  <div id="toast" class="toast" aria-live="polite">Gespeichert ✅</div>
 
   <!-- WAITLIST MODAL -->
   <div class="modal-backdrop" id="waitlistBackdrop" aria-hidden="true">
@@ -491,14 +509,14 @@
   const todayISO = ()=>toISODate(new Date());
   const nowHHMM = ()=>{ const d=new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); };
 
-  /* ✅ Toast */
+  /* ✅ Toast logic */
   const toastEl = $("toast");
   function showToast(msg){
     if(!toastEl) return;
     toastEl.textContent = msg || "Gespeichert ✅";
     toastEl.classList.add("show");
     clearTimeout(showToast._t);
-    showToast._t = setTimeout(()=> toastEl.classList.remove("show"), 1400);
+    showToast._t = setTimeout(()=> toastEl.classList.remove("show"), 1800);
   }
 
   function roundToMin(date, step){
@@ -836,8 +854,8 @@
     recompute();
   }
 
+  /* ✅ Nach Speichern: nur Beginn & Ende leeren, Rest bleibt */
   function clearAfterSaveKeepSettings(){
-    // ✅ Gewünscht: Stundenlohn, Sollstunden, Pause, Fahrzeit bleiben stehen
     startEl.value = "";
     endEl.value = "";
   }
@@ -1079,11 +1097,8 @@
 
     saveEntries(entries);
 
-    // ✅ gewünschtes Verhalten:
-    // - Popup "Gespeichert"
-    // - Start/Ende leeren
-    // - Wage/Plan/Break/Travel bleiben stehen
-    setError("", true, false);
+    /* ✅ Statt langem Text: Toast + Inputs leeren */
+    setError("", false, false);
     showToast("Gespeichert ✅");
     clearAfterSaveKeepSettings();
 
