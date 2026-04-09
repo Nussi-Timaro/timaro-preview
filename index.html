@@ -29,8 +29,7 @@
       --radius:18px;
     }
 
-    /* ✅ iOS/Safari: verhindert Text-Auto-Resize */
-    html{ -webkit-text-size-adjust:100%; }
+    html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
     body{ overflow-x:hidden; }
 
     *{box-sizing:border-box}
@@ -55,7 +54,60 @@
       box-shadow: var(--shadow);
     }
 
-    /* ✅ FIX A: obere Felder (2-Spalten) als FLEX statt GRID -> kein Safari-Overlap */
+    .hero{
+      margin-bottom:14px;
+      padding:18px 16px;
+    }
+    .hero-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:12px;
+    }
+    .hero-title{
+      margin:0 0 10px;
+      font-size:28px;
+      line-height:1.08;
+      letter-spacing:.2px;
+    }
+    .hero-sub{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.5;
+    }
+    .hero-points{
+      display:grid;
+      gap:10px;
+      margin-top:16px;
+    }
+    .hero-point{
+      border:1px solid var(--stroke);
+      border-radius:14px;
+      background:rgba(0,0,0,.14);
+      padding:12px 14px;
+      color:rgba(255,255,255,.92);
+      font-size:14px;
+    }
+    .hero-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:16px;
+    }
+    .hero-note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+
     .grid{
       display:flex;
       flex-wrap:wrap;
@@ -66,14 +118,12 @@
       min-width:0;
     }
 
-    /* Das 3er Layout lassen wir wie gehabt (du wolltest nur A fixen) */
     .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 
     .field{display:flex;flex-direction:column;gap:8px;min-width:0;}
     label{font-size:13px;color:var(--muted);letter-spacing:.2px;}
     input, select, button, textarea{font:inherit;}
 
-    /* ✅ iOS: Inputs >=16px, sonst zoomt Safari und Layout überlappt */
     input, select, textarea{
       width:100%;
       padding:12px 12px;
@@ -165,7 +215,6 @@
       padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer;color:var(--text);
     }
 
-    /* Modal */
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -238,7 +287,6 @@
       line-height: 1.35;
     }
 
-    /* Stars */
     .stars{
       display:flex;
       gap:10px;
@@ -266,17 +314,16 @@
     }
 
     @media (max-width:640px){
-      /* .grid ist Flex -> auf Handy eine Spalte */
       .grid > .field{ flex: 1 1 100%; }
-
       .grid-3{grid-template-columns:1fr;}
       .footer-actions{grid-template-columns:1fr;}
       .stats{grid-template-columns:1fr 1fr;}
       .modal-actions{grid-template-columns: 1fr;}
       .star{width:44px;height:44px;}
+      .hero-title{font-size:24px;}
+      .hero-actions{grid-template-columns:1fr;}
     }
 
-    /* ✅ Größeres "Gespeichert" Popup */
     .toast{
       position: fixed;
       left: 50%;
@@ -315,7 +362,31 @@
       <div class="pill">offline • anonym</div>
     </div>
 
-    <div class="card">
+    <div class="hero card">
+      <div class="hero-badge">Für Handwerker • Fahrzeit • Überstunden • offline</div>
+
+      <h2 class="hero-title">Verdienst du im Handwerk weniger als dir zusteht?</h2>
+
+      <p class="hero-sub">
+        Timaro zeigt dir in Sekunden deine echte Arbeitszeit – inklusive Fahrzeit,
+        Pause und Überstunden. Schnell checken, was dir wirklich zusteht.
+      </p>
+
+      <div class="hero-points">
+        <div class="hero-point">✔ Arbeitszeit sofort berechnen</div>
+        <div class="hero-point">✔ Fahrzeit & Überstunden einrechnen</div>
+        <div class="hero-point">✔ Wie eine App nutzbar</div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="btnStartCheck" type="button">Jetzt kostenlos checken</button>
+        <button class="btn" id="btnHeroWaitlist" type="button">Early Access sichern</button>
+      </div>
+
+      <div class="hero-note">📱 Tipp: Füge Timaro deinem Startbildschirm hinzu für echtes App-Feeling.</div>
+    </div>
+
+    <div class="card" id="toolCard">
       <div class="row" style="justify-content:space-between; margin-bottom:10px;">
         <div class="badge" id="modeBadge"><strong>Neu</strong> – Tag erfassen</div>
         <div class="badge">Heute: <strong id="nowText">--:--</strong></div>
@@ -406,10 +477,8 @@
     </div>
   </div>
 
-  <!-- ✅ Toast -->
   <div id="toast" class="toast" aria-live="polite">Gespeichert ✅</div>
 
-  <!-- WAITLIST MODAL -->
   <div class="modal-backdrop" id="waitlistBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="waitlistTitle">
       <div class="modal-head">
@@ -442,7 +511,6 @@
     </div>
   </div>
 
-  <!-- FEEDBACK MODAL -->
   <div class="modal-backdrop" id="feedbackBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
       <div class="modal-head">
@@ -495,12 +563,10 @@
 (function(){
   "use strict";
 
-  // WAITLIST
   const WAITLIST_FORM_ID = "1FAIpQLScYcpRW7s2xD5WwuU7uqTB56jeCEfvzPfB8j7ZLUI4m-arlSg";
   const WAITLIST_EMAIL_ENTRY = "entry.767319811";
   const WAITLIST_ACTION = "https://docs.google.com/forms/d/e/" + WAITLIST_FORM_ID + "/formResponse";
 
-  // FEEDBACK
   const FEEDBACK_FORM_ID = "1FAIpQLScE59CCtGl-8k3Z5D7Sda9CZk44INs0ta_NXl54YlPZKRLdXw";
   const FB_RATING_ENTRY = "entry.721657428";
   const FB_COMMENT_ENTRY = "entry.404280932";
@@ -520,7 +586,6 @@
   const todayISO = ()=>toISODate(new Date());
   const nowHHMM = ()=>{ const d=new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); };
 
-  /* ✅ Toast logic */
   const toastEl = $("toast");
   function showToast(msg){
     if(!toastEl) return;
@@ -584,7 +649,6 @@
   }
   function normalizeEmail(email){ return String(email||"").trim().toLowerCase(); }
 
-  // Refs
   const dateEl = $("date");
   const wageEl = $("wage");
   const startEl = $("start");
@@ -679,7 +743,6 @@
     }
   }
 
-  // New saves only TODAY, edits allowed if exists.
   function canSaveSelectedDate(dISO){
     const entries = loadEntries();
     const exists = !!entries[dISO];
@@ -865,7 +928,6 @@
     recompute();
   }
 
-  /* ✅ Nach Speichern: nur Beginn & Ende leeren, Rest bleibt */
   function clearAfterSaveKeepSettings(){
     startEl.value = "";
     endEl.value = "";
@@ -891,7 +953,6 @@
     applyEndMaxIfToday();
   }
 
-  // WAITLIST modal
   const waitlistBackdrop = $("waitlistBackdrop");
   const waitlistEmail = $("waitlistEmail");
   const waitlistErr = $("waitlistErr");
@@ -974,7 +1035,6 @@
     }, 900);
   }
 
-  // FEEDBACK modal
   const feedbackBackdrop = $("feedbackBackdrop");
   const starsWrap = $("stars");
   const ratingText = $("ratingText");
@@ -1108,7 +1168,6 @@
 
     saveEntries(entries);
 
-    /* ✅ Statt langem Text: Toast + Inputs leeren */
     setError("", false, false);
     showToast("Gespeichert ✅");
     clearAfterSaveKeepSettings();
@@ -1149,7 +1208,6 @@
     btnClear.addEventListener("click", clearFieldsKeepDate);
     btnDeleteAll.addEventListener("click", deleteAllData);
 
-    // Waitlist
     btnWaitlist.addEventListener("click", openWaitlist);
     btnWaitlistTop.addEventListener("click", openWaitlist);
     btnCloseWaitlist.addEventListener("click", closeWaitlist);
@@ -1161,7 +1219,21 @@
       if(e.key === "Escape"){ e.preventDefault(); closeWaitlist(); }
     });
 
-    // Feedback button ALWAYS works
+    const btnHeroWaitlist = document.getElementById("btnHeroWaitlist");
+    if(btnHeroWaitlist){
+      btnHeroWaitlist.addEventListener("click", openWaitlist);
+    }
+
+    const btnStartCheck = document.getElementById("btnStartCheck");
+    if(btnStartCheck){
+      btnStartCheck.addEventListener("click", ()=>{
+        const toolCard = document.getElementById("toolCard");
+        if(toolCard){
+          toolCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+
     const fbBtn = document.getElementById("btnFeedback");
     if(fbBtn){
       fbBtn.addEventListener("click", openFeedback);
@@ -1180,7 +1252,6 @@
       fbErr.style.display="none";
     });
 
-    // Test-Reset: long-press title
     const title = document.getElementById("appTitle");
     if(title){
       let pressTimer = null;
@@ -1204,4 +1275,4 @@
 })();
 </script>
 </body>
-      </html>
+              </html>
